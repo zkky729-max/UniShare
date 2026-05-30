@@ -1,70 +1,46 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import api from "../api/axios"
-import { useAuth } from "../context/AuthContext"
+import { useState } from "react";
+import { supabase } from "../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { login: authLogin } = useAuth()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const handleLogin = async () => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try {
-      const res = await api.post("/auth/login", {
-        email,
-        password,
-      })
-
-      console.log("SUCCESS:", res.data)
-
-      authLogin(res.data.token, res.data.user)
-
-      navigate("/dashboard")
-    } catch (error: any) {
-      console.log("ERROR:", error.response?.data)
-      console.error(error)
+    if (!error) {
+      navigate("/dashboard");
+    } else {
+      alert(error.message);
     }
-  }
+  };
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-4">
-        Login
-      </h1>
+    <div className="flex flex-col gap-3 w-80 mx-auto mt-20">
+      <input
+        placeholder="Email"
+        className="border p-2"
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <form
-        onSubmit={handleLogin}
-        className="flex flex-col gap-4 max-w-sm"
+      <input
+        placeholder="Password"
+        type="password"
+        className="border p-2"
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <button
+        onClick={handleLogin}
+        className="bg-blue-500 text-white p-2"
       >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 rounded"
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded"
-          required
-        />
-
-        <button
-          type="submit"
-          className="bg-black text-white py-2 rounded"
-        >
-          Login
-        </button>
-      </form>
+        Login
+      </button>
     </div>
-  )
+  );
 }
