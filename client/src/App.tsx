@@ -1,3 +1,5 @@
+import Register from "./pages/Register";
+
 export default function App() {
-  return <h1>UniShare Working 🚀</h1>;
+  return <Register />;
 }

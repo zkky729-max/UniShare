@@ -1,60 +1,48 @@
 import { useState } from "react";
-import { registerUser } from "../api/auth";
+import { supabase } from "../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
-    console.log("REGISTER CLICKED");
-    console.log("EMAIL:", email);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    try {
-      const res = await registerUser({
-        email,
-        password,
-      });
-
-      console.log("REGISTER SUCCESS:", res.data);
-
+    if (!error) {
       alert("Account created successfully!");
-    } catch (err: any) {
-      console.log("REGISTER ERROR:", err);
-
-      if (err.response) {
-        console.log(err.response.data);
-        alert(JSON.stringify(err.response.data));
-      } else {
-        alert(err.message);
-      }
+      navigate("/login");
+    } else {
+      alert(error.message);
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Register TEST 123</h2>
-
+    <div className="flex flex-col gap-3 w-80 mx-auto mt-20">
       <input
         type="email"
         placeholder="Email"
+        className="border p-2"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <br />
-      <br />
-
       <input
         type="password"
         placeholder="Password"
+        className="border p-2"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <br />
-      <br />
-
-      <button onClick={handleRegister}>
+      <button
+        onClick={handleRegister}
+        className="bg-green-500 text-white p-2"
+      >
         Register
       </button>
     </div>
