@@ -1,4 +1,17 @@
+:root {
+  --bg: #f5f6fa;
+  --text: #000;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  transition: all 0.3s ease;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Dark Mode */
+body.dark {
+  --bg: #0f172a;
+  --text: #ffffff;
 }

@@ -5,42 +5,52 @@ import { useNavigate } from "react-router-dom";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (!error) {
-      navigate("/dashboard");
+    if (error) {
+      setMsg("❌ " + error.message);
     } else {
-      alert(error.message);
+      setMsg("✅ تسجيل الدخول ناجح");
+      setTimeout(() => navigate("/dashboard"), 1000);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3 w-80 mx-auto mt-20">
-      <input
-        placeholder="Email"
-        className="border p-2"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+    <div style={{ padding: 20 }}>
+      <h1>Login</h1>
 
-      <input
-        placeholder="Password"
-        type="password"
-        className="border p-2"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <form onSubmit={handleLogin}>
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <button
-        onClick={handleLogin}
-        className="bg-blue-500 text-white p-2"
-      >
-        Login
-      </button>
+        <br />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <br />
+
+        <button type="submit">Login</button>
+      </form>
+
+      <p>{msg}</p>
     </div>
   );
 }

@@ -5,46 +5,52 @@ import { useNavigate } from "react-router-dom";
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState("");
+
   const navigate = useNavigate();
 
-  const handleRegister = async () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (!error) {
-      alert("Account created successfully!");
-      navigate("/login");
+    if (error) {
+      setMsg("❌ " + error.message);
     } else {
-      alert(error.message);
+      setMsg("✅ تم إنشاء الحساب بنجاح، سجل دخول الآن");
+      setTimeout(() => navigate("/login"), 1500);
     }
   };
 
   return (
-    <div className="flex flex-col gap-3 w-80 mx-auto mt-20">
-      <input
-        type="email"
-        placeholder="Email"
-        className="border p-2"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+    <div style={{ padding: 20 }}>
+      <h1>Register</h1>
 
-      <input
-        type="password"
-        placeholder="Password"
-        className="border p-2"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <form onSubmit={handleRegister}>
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <button
-        onClick={handleRegister}
-        className="bg-green-500 text-white p-2"
-      >
-        Register
-      </button>
+        <br />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <br />
+
+        <button type="submit">Create account</button>
+      </form>
+
+      <p>{msg}</p>
     </div>
   );
 }

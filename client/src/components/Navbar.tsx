@@ -1,52 +1,76 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
-    <nav className="flex justify-between items-center px-6 py-4 bg-white shadow">
-      
-      <Link to="/" className="font-bold text-xl">
-        UniShare 🚀
-      </Link>
+    <nav style={styles.nav}>
+      <div style={styles.left}>
+        <Link to="/">UniShare</Link>
+      </div>
 
-      <div className="flex items-center gap-4">
+      <div style={styles.right}>
+        <button onClick={toggleTheme} style={styles.themeBtn}>
+          {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+        </button>
 
-        <Link to="/" className="hover:text-blue-500">
-          Home
-        </Link>
-
-        {user ? (
+        {!user ? (
           <>
-            <Link to="/dashboard" className="hover:text-blue-500">
-              Dashboard
-            </Link>
-
-            <span className="text-sm text-gray-600">
-              {user.email}
-            </span>
-
-            <button
-              onClick={logout}
-              className="bg-red-500 text-white px-3 py-1 rounded"
-            >
-              Logout
-            </button>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-blue-500">
-              Login
-            </Link>
-
-            <Link to="/register" className="hover:text-blue-500">
-              Register
-            </Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/profile">Profile</Link>
+            <button onClick={handleLogout} style={styles.logout}>
+              Logout
+            </button>
           </>
         )}
-
       </div>
     </nav>
   );
 }
+
+const styles: any = {
+  nav: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: 15,
+    background: "#111",
+    color: "#fff",
+    alignItems: "center",
+  },
+  left: {
+    fontWeight: "bold",
+  },
+  right: {
+    display: "flex",
+    gap: 10,
+    alignItems: "center",
+  },
+  logout: {
+    background: "red",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+  themeBtn: {
+    background: "#444",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
+};
