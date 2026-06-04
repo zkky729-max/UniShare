@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -20,16 +20,16 @@ export default function Login() {
     if (error) {
       setMsg("❌ " + error.message);
     } else {
-      setMsg("✅ تسجيل الدخول ناجح");
-      setTimeout(() => navigate("/dashboard"), 1000);
+      setMsg("✅ تم إنشاء الحساب بنجاح، سجل دخول الآن");
+      setTimeout(() => navigate("/login"), 1500);
     }
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Login</h1>
+      <h1>Register</h1>
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleRegister}>
         <input
           placeholder="Email"
           value={email}
@@ -47,7 +47,7 @@ export default function Login() {
 
         <br />
 
-        <button type="submit">Login</button>
+        <button type="submit">Create account</button>
       </form>
 
       <p>{msg}</p>
