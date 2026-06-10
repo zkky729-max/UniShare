@@ -1,73 +1,66 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom"
 
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
+import Admin from "./pages/Admin"
+import Login from "./pages/auth/Login"
 
-import Dashboard from "./pages/user/Dashboard";
-import Profile from "./pages/user/Profile";
+import SpecialtiesPage from "./pages/admin/SpecialtiesPage"
+import ModulesPage from "./pages/admin/ModulesPage"
+import YearsPage from "./pages/admin/YearsPage"
 
-import FacultiesPage from "./pages/university/FacultiesPage";
-import FacultySpecialtiesPage from "./pages/university/FacultySpecialtiesPage";
-import ModulesPage from "./pages/university/ModulesPage";
+import ProtectedRoute from "./components/ProtectedRoute"
+import { AuthProvider } from "./context/AuthContext"
 
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-export default function App() {
+function App() {
   return (
-    <>
-      <Navbar />
-
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<Login />} />
+
+        <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
 
+        {/* ADMIN */}
         <Route
-          path="/dashboard"
+          path="/admin"
           element={
-            <ProtectedRoute>
-              <Dashboard />
+            <ProtectedRoute role="admin">
+              <Admin />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/profile"
+          path="/admin/specialties"
           element={
-            <ProtectedRoute>
-              <Profile />
+            <ProtectedRoute role="admin">
+              <SpecialtiesPage />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/faculties"
+          path="/admin/modules"
           element={
-            <ProtectedRoute>
-              <FacultiesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/specialties/:facultyId"
-          element={
-            <ProtectedRoute>
-              <FacultySpecialtiesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/modules/:specialtyId"
-          element={
-            <ProtectedRoute>
+            <ProtectedRoute role="admin">
               <ModulesPage />
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/admin/years"
+          element={
+            <ProtectedRoute role="admin">
+              <YearsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+
       </Routes>
-    </>
-  );
+    </AuthProvider>
+  )
 }
+
+export default App

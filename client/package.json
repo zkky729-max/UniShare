@@ -9,11 +9,13 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
+    "axios": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.16.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",

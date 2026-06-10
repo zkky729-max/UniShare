@@ -1,63 +1,73 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../../lib/supabase";
+import { useEffect, useState } from "react"
+import { supabase } from "../../lib/supabase"
 
 type Faculty = {
-  id: string;
-  name: string;
-};
+  id: string
+  name: string
+}
 
 export default function FacultiesPage() {
-  const navigate = useNavigate();
-
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [faculties, setFaculties] = useState<Faculty[]>([])
+  const [name, setName] = useState("")
 
   useEffect(() => {
-    loadFaculties();
-  }, []);
+    load()
+  }, [])
 
-  async function loadFaculties() {
+  async function load() {
     const { data, error } = await supabase
       .from("faculties")
       .select("*")
-      .order("name");
 
-    console.log("FACULTIES DATA =", data);
-    console.log("FACULTIES ERROR =", error);
+    console.log("LOAD FACULTIES:", data)
+    console.log("LOAD ERROR:", error)
 
-    if (!error) {
-      setFaculties(data || []);
-    }
-
-    setLoading(false);
+    setFaculties(data || [])
   }
 
-  if (loading) {
-    return <h2>Loading faculties...</h2>;
+  async function add() {
+    console.log("ADDING:", name)
+
+    const { error } = await supabase
+      .from("faculties")
+      .insert({ name })
+
+    console.log("INSERT ERROR:", error)
+
+    if (!error) load()
+  }
+
+  async function remove(id: string) {
+    console.log("DELETE ID:", id)
+
+    const { error } = await supabase
+      .from("faculties")
+      .delete()
+      .eq("id", id)
+
+    console.log("DELETE ERROR:", error)
+
+    if (!error) load()
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>🏛 الكليات</h1>
+    <div style={{ padding: 20 }}>
+      <h1>🏛 Faculties</h1>
 
-      <p>عدد الكليات: {faculties.length}</p>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Faculty name"
+      />
 
-      {faculties.map((faculty) => (
-        <div
-          key={faculty.id}
-          onClick={() => navigate(`/specialties/${faculty.id}`)}
-          style={{
-            padding: "15px",
-            marginTop: "10px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            cursor: "pointer",
-          }}
-        >
-          <h3>{faculty.name}</h3>
+      <button onClick={add}>➕ Add</button>
+
+      {faculties.map((f) => (
+        <div key={f.id} style={{ display: "flex", gap: 10 }}>
+          <p>{f.name}</p>
+          <button onClick={() => remove(f.id)}>🗑 Delete</button>
         </div>
       ))}
     </div>
-  );
+  )
 }

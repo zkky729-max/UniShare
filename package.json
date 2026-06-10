@@ -6,5 +6,8 @@
   },
   "scripts": {
     "dev": "concurrently -n SERVER,CLIENT -c blue,green \"pnpm --filter server dev\" \"pnpm --filter client dev\""
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }

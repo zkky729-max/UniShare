@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { supabase } from "../../lib/supabase"
-import DashboardLayout from "../../layouts/DashboardLayout"
+import { supabase } from "../lib/supabase"
+import DashboardLayout from "../layouts/DashboardLayout"
 
-export default function Dashboard() {
+export default function Admin() {
+  const [usersCount, setUsersCount] = useState(0)
   const [facultiesCount, setFacultiesCount] = useState(0)
   const [specialtiesCount, setSpecialtiesCount] = useState(0)
 
@@ -11,6 +12,10 @@ export default function Dashboard() {
   }, [])
 
   async function loadStats() {
+    const { count: users } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+
     const { count: faculties } = await supabase
       .from("faculties")
       .select("*", { count: "exact", head: true })
@@ -19,6 +24,7 @@ export default function Dashboard() {
       .from("specialties")
       .select("*", { count: "exact", head: true })
 
+    setUsersCount(users || 0)
     setFacultiesCount(faculties || 0)
     setSpecialtiesCount(specialties || 0)
   }
@@ -27,12 +33,12 @@ export default function Dashboard() {
     <DashboardLayout>
       <div style={{ padding: 20 }}>
 
-        <h1 style={{ fontSize: 28, fontWeight: "bold" }}>
-          👋 Welcome to UniShare Dashboard
+        <h1 style={{ fontSize: 30, fontWeight: "bold" }}>
+          🔴 Admin Dashboard
         </h1>
 
-        <p style={{ marginTop: 10, color: "gray" }}>
-          System overview and statistics
+        <p style={{ color: "gray", marginTop: 5 }}>
+          System control panel
         </p>
 
         {/* STATS */}
@@ -43,29 +49,34 @@ export default function Dashboard() {
         }}>
 
           <div style={card}>
-            <h2>🏛 Faculties</h2>
+            <h3>👤 Users</h3>
+            <p style={number}>{usersCount}</p>
+          </div>
+
+          <div style={card}>
+            <h3>🏛 Faculties</h3>
             <p style={number}>{facultiesCount}</p>
           </div>
 
           <div style={card}>
-            <h2>🎓 Specialties</h2>
+            <h3>🎓 Specialties</h3>
             <p style={number}>{specialtiesCount}</p>
           </div>
 
         </div>
 
-        {/* QUICK ACTIONS */}
+        {/* ACTIONS */}
         <div style={{ marginTop: 40 }}>
-          <h2>⚡ Quick Actions</h2>
+          <h2>⚙️ Management</h2>
 
           <div style={{ display: "flex", gap: 10, marginTop: 15 }}>
 
             <a href="/faculties" style={button}>
-              ➕ Manage Faculties
+              🏛 Manage Faculties
             </a>
 
-            <a href="/admin" style={button}>
-              🛠 Admin Panel
+            <a href="/dashboard" style={button}>
+              📊 View User Dashboard
             </a>
 
           </div>
@@ -85,7 +96,7 @@ const card: React.CSSProperties = {
 }
 
 const number: React.CSSProperties = {
-  fontSize: 32,
+  fontSize: 30,
   fontWeight: "bold",
   marginTop: 10
 }

@@ -1,23 +1,26 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { Navigate } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
 
-export default function ProtectedRoute({ children }: any) {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+export default function ProtectedRoute({
+  children,
+  role,
+}: {
+  children: React.ReactNode
+  role?: string
+}) {
+  const { user, profile, loading } = useAuth()
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      setLoading(false);
-    });
-  }, []);
+  console.log("USER:", user)
+  console.log("PROFILE:", profile)
+  console.log("ROLE REQUIRED:", role)
 
-  if (loading) return <h2>Loading...</h2>;
+  if (loading) return <h3>Loading...</h3>
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" />
+
+  if (role && profile?.role !== role) {
+    return <h3>Not authorized</h3>
   }
 
-  return children;
+  return children
 }

@@ -1,69 +1,62 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { createContext, useContext, useEffect, useState } from "react"
+import { supabase } from "../lib/supabase"
 
-type User = {
-  id: string;
-  email: string;
-} | null;
+type Profile = {
+  id: string
+  full_name: string
+  avatar_url: string | null
+  role: string
+}
 
-type AuthContextType = {
-  user: User;
-  loading: boolean;
-  logout: () => Promise<void>;
-};
+const AuthContext = createContext<any>(null)
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  logout: async () => {},
-});
-
-export const AuthProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [user, setUser] = useState<User>(null);
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
+    init()
 
-      setUser(data.user as any);
-      setLoading(false);
-    };
-
-    getUser();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser((session?.user as any) || null);
-        setLoading(false);
-      }
-    );
+    const { data } = supabase.auth.onAuthStateChange(() => {
+      init()
+    })
 
     return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+      data.subscription.unsubscribe()
+    }
+  }, [])
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
+  async function init() {
+    setLoading(true)
+
+    const { data } = await supabase.auth.getUser()
+    const user = data.user
+
+    setUser(user)
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      setProfile(profile || null)
+    } else {
+      setProfile(null)
+    }
+
+    setLoading(false)
+  }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, profile, loading }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext)
+}
