@@ -5,20 +5,26 @@ export async function getLikes(postId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { count } = await supabase
-    .from("likes")
+  // عدد الإعجابات
+  const { count, error: countError } = await supabase
+    .from("post_likes")
     .select("*", {
       count: "exact",
       head: true,
     })
     .eq("post_id", postId);
 
-  const { data } = await supabase
-    .from("likes")
+  if (countError) throw countError;
+
+  // هل المستخدم أعجب بالمنشور؟
+  const { data, error: likedError } = await supabase
+    .from("post_likes")
     .select("id")
     .eq("post_id", postId)
     .eq("user_id", user?.id ?? "")
     .maybeSingle();
+
+  if (likedError) throw likedError;
 
   return {
     count: count ?? 0,

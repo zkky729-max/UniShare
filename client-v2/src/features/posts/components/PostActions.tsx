@@ -4,70 +4,203 @@ import {
   Share2,
 } from "lucide-react";
 
-import { useLike } from "../hooks/useLike";
+import { useState } from "react";
+
+import { useFeed } from "../context/FeedContext";
+
 
 interface Props {
+
   postId: string;
-  comments: number;
-  shares: number;
+
+  showComments?: boolean;
 
   onComment?: () => void;
+
   onShare?: () => void;
+
 }
 
+
+
 export default function PostActions({
+
   postId,
-  comments,
-  shares,
+
+  showComments = false,
+
   onComment,
+
   onShare,
+
 }: Props) {
 
+
   const {
-    likes,
-    liked,
-    loading,
-    handleLike,
-  } = useLike(postId);
+    posts,
+    toggleLike,
+  } = useFeed();
+
+
+
+  const post =
+    posts.find(
+      (item) =>
+        item.id === postId
+    );
+
+
+
+  const [loading, setLoading] =
+    useState(false);
+
+
+
+  if (!post) {
+    return null;
+  }
+
+
+
+  const likedByMe =
+    post.likedByMe;
+
+
+
+  async function handleLike() {
+
+    try {
+
+      setLoading(true);
+
+
+      await toggleLike(
+        postId,
+        likedByMe
+      );
+
+
+    } catch(error) {
+
+      console.error(
+        "Like error:",
+        error
+      );
+
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  }
+
+
+
 
   return (
-    <div className="flex justify-around border-t py-3">
+
+    <div className="grid grid-cols-3 border-t">
+
 
       <button
+
         onClick={handleLike}
+
         disabled={loading}
-        className={`flex items-center gap-2 transition ${
-          liked
+
+        className={`flex items-center justify-center gap-2 py-3 transition hover:bg-gray-50 ${
+          likedByMe
             ? "text-red-500"
-            : "hover:text-red-500"
+            : "text-gray-600 hover:text-red-500"
         }`}
+
       >
+
         <Heart
+
           size={20}
-          fill={liked ? "currentColor" : "none"}
+
+          fill={
+            likedByMe
+              ? "currentColor"
+              : "none"
+          }
+
         />
 
-        <span>{likes}</span>
+
+        <span className="font-medium">
+          Like
+        </span>
+
+
       </button>
 
+
+
+
+
+
       <button
+
         onClick={onComment}
-        className="flex items-center gap-2 transition hover:text-blue-500"
-      >
-        <MessageCircle size={20} />
 
-        <span>{comments}</span>
+        className={`flex items-center justify-center gap-2 py-3 transition hover:bg-gray-50 ${
+          showComments
+            ? "text-blue-600"
+            : "text-gray-600"
+        }`}
+
+      >
+
+        <MessageCircle size={20}/>
+
+
+        <span className="font-medium">
+          Comment
+        </span>
+
+
       </button>
+
+
+
+
+
+
 
       <button
-        onClick={onShare}
-        className="flex items-center gap-2 transition hover:text-green-600"
-      >
-        <Share2 size={20} />
 
-        <span>{shares}</span>
+        onClick={onShare}
+
+        className="
+        flex
+        items-center
+        justify-center
+        gap-2
+        py-3
+        text-gray-600
+        transition
+        hover:bg-gray-50
+        "
+
+      >
+
+        <Share2 size={20}/>
+
+
+        <span className="font-medium">
+          Share
+        </span>
+
+
       </button>
+
 
     </div>
+
   );
+
 }

@@ -1,76 +1,328 @@
+import { useState } from "react";
+
+import PostHeader from "./PostHeader";
+import PostContent from "./PostContent";
+import PostMedia from "./PostMedia";
+import PostFooter from "./PostFooter";
 import PostActions from "./PostActions";
+
+import DeletePostDialog from "./DeletePostDialog";
+import EditPostDialog from "./EditPostDialog";
+
+import CommentsList from "../comments/components/CommentsList";
+
+import { useFeed } from "../context/FeedContext";
+
 import type { Post } from "../types/post";
+
 
 interface Props {
   post: Post;
 }
 
-export default function PostCard({ post }: Props) {
+
+export default function PostCard({
+  post,
+}: Props) {
+
+
+  const {
+    deletePost,
+    updatePost,
+  } = useFeed();
+
+
+
+
+  const [showComments, setShowComments] =
+    useState(false);
+
+
+  const [showDeleteDialog, setShowDeleteDialog] =
+    useState(false);
+
+
+  const [showEditDialog, setShowEditDialog] =
+    useState(false);
+
+
+  const [deleting, setDeleting] =
+    useState(false);
+
+
+  const [updating, setUpdating] =
+    useState(false);
+
+
+
+
+
+
+
+  async function confirmDelete() {
+
+    try {
+
+      setDeleting(true);
+
+      await deletePost(post.id);
+
+
+    } catch(error) {
+
+      console.error(
+        "Delete error:",
+        error
+      );
+
+
+    } finally {
+
+      setDeleting(false);
+
+      setShowDeleteDialog(false);
+
+    }
+
+  }
+
+
+
+
+
+
+
+
+  async function confirmUpdate(
+    content:string
+  ) {
+
+
+    try {
+
+
+      setUpdating(true);
+
+
+      await updatePost({
+
+        id: post.id,
+
+        content,
+
+      });
+
+
+
+    } catch(error) {
+
+
+      console.error(
+        "Update error:",
+        error
+      );
+
+
+    } finally {
+
+
+      setUpdating(false);
+
+      setShowEditDialog(false);
+
+
+    }
+
+
+  }
+
+
+
+
+
+
+
+
   return (
-    <article className="overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md">
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <img
-            src={post.author.avatar || "/avatars/default.png"}
-            alt={post.author.name}
-            className="h-12 w-12 rounded-full border object-cover"
-            onError={(e) => {
-              e.currentTarget.src = "/avatars/default.png";
-            }}
+
+    <>
+
+      <article
+
+        className="
+          overflow-hidden
+          rounded-2xl
+          border
+          border-gray-200
+          bg-white
+          shadow-sm
+          transition-all
+          duration-300
+          hover:-translate-y-1
+          hover:shadow-lg
+        "
+
+      >
+
+
+        <div className="p-5">
+
+
+
+          <PostHeader
+
+            author={post.author}
+
+            createdAt={post.createdAt}
+
+            isOwner={post.isOwner}
+
+            onEdit={() =>
+              setShowEditDialog(true)
+            }
+
+            onDelete={() =>
+              setShowDeleteDialog(true)
+            }
+
           />
 
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-gray-900">
-                {post.author.name}
-              </h2>
 
-              {post.author.role && (
-                <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
-                  {post.author.role}
-                </span>
-              )}
-            </div>
 
-            <p className="text-sm text-gray-500">
-              {post.createdAt}
-            </p>
-          </div>
+
+
+          <PostContent
+
+            content={post.content}
+
+          />
+
+
+
+
+
+
+
+          <PostMedia
+
+            image={post.image}
+
+            pdf={post.pdf}
+
+          />
+
+
+
+
+
+
+
+          <PostFooter
+
+            likes={post.likes}
+
+            comments={post.comments}
+
+            shares={post.shares}
+
+          />
+
+
+
         </div>
 
-        {/* Content */}
-        <p className="mt-5 whitespace-pre-wrap leading-7 text-gray-800">
-          {post.content}
-        </p>
 
-        {/* Image */}
-        {post.image && (
-          <img
-            src={post.image}
-            alt="Post"
-            className="mt-5 w-full rounded-xl border object-cover"
+
+
+
+
+        <PostActions
+
+          postId={post.id}
+
+          showComments={showComments}
+
+          onComment={() =>
+            setShowComments(
+              prev => !prev
+            )
+          }
+
+          onShare={() => {}}
+
+        />
+
+
+
+
+
+
+
+
+        {showComments && (
+
+          <CommentsList
+
+            postId={post.id}
+
           />
+
         )}
 
-        {/* PDF */}
-        {post.pdf && (
-          <a
-            href={post.pdf}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-5 flex items-center gap-2 rounded-xl border bg-gray-50 p-4 text-blue-600 transition hover:bg-gray-100"
-          >
-            📄 عرض ملف PDF
-          </a>
-        )}
-      </div>
 
-      <PostActions
-        postId={post.id}
-        comments={post.comments}
-        shares={post.shares}
+
+      </article>
+
+
+
+
+
+
+
+
+
+      <DeletePostDialog
+
+        open={showDeleteDialog}
+
+        loading={deleting}
+
+        onClose={() =>
+          setShowDeleteDialog(false)
+        }
+
+        onConfirm={confirmDelete}
+
       />
-    </article>
+
+
+
+
+
+
+
+
+
+      <EditPostDialog
+
+        open={showEditDialog}
+
+        loading={updating}
+
+        initialContent={post.content}
+
+        onClose={() =>
+          setShowEditDialog(false)
+        }
+
+        onSave={confirmUpdate}
+
+      />
+
+
+
+    </>
+
   );
+
 }

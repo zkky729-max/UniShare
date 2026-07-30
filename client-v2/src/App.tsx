@@ -16,15 +16,16 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 
 
-// Layout
+// Layouts
 import DashboardLayout from "./layouts/DashboardLayout";
 
 
-// Dashboard
+// Dashboard / Profile
 import Dashboard from "./features/dashboard/pages/Dashboard";
 import Profile from "./features/profile/pages/Profile";
 import CompleteProfilePage from "./features/profile/pages/CompleteProfilePage";
 import EditProfile from "./features/profile/pages/EditProfile";
+
 
 // Avatar
 import CreateAvatar from "./features/avatar/pages/CreateAvatar";
@@ -32,6 +33,9 @@ import CreateAvatar from "./features/avatar/pages/CreateAvatar";
 
 // Posts
 import PostsPage from "./features/posts/pages/PostsPage";
+import {
+  FeedProvider,
+} from "./features/posts/context/FeedContext";
 
 
 // Countries
@@ -52,6 +56,10 @@ import Semesters from "./features/semesters/pages/Semesters";
 import Modules from "./features/modules/pages/Modules";
 
 
+// Admin
+import AdminRoutes from "./features/admin/routes/adminRoutes";
+
+
 
 export default function App() {
 
@@ -60,176 +68,181 @@ export default function App() {
 
     <BrowserRouter>
 
-      <Routes>
+
+      <FeedProvider>
 
 
-        {/* Public */}
-
-        <Route
-          path="/"
-          element={<HomePage />}
-        />
+        <Routes>
 
 
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+          {/* Public */}
+
+          <Route
+            path="/"
+            element={<HomePage />}
+          />
 
 
-        <Route
-          path="/register"
-          element={<RegisterPage />}
-        />
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
 
 
-
-        {/* Complete Profile */}
-
-        <Route
-          path="/complete-profile"
-          element={<CompleteProfilePage />}
-        />
+          <Route
+            path="/register"
+            element={<RegisterPage />}
+          />
 
 
+          <Route
+            path="/complete-profile"
+            element={<CompleteProfilePage />}
+          />
 
-        {/* Old Avatar route */}
 
-        <Route
-          path="/create-avatar"
-          element={<CreateAvatar />}
-        />
-
+          <Route
+            path="/create-avatar"
+            element={<CreateAvatar />}
+          />
 
 
 
+          {/* Admin */}
 
-        {/* Protected */}
-
-        <Route element={<ProtectedRoute />}>
-
-
-          <Route element={<DashboardLayout />}>
+          <Route
+            path="/admin/*"
+            element={<AdminRoutes />}
+          />
 
 
-            <Route
-              path="/dashboard"
-              element={<Dashboard />}
-            />
 
+
+          {/* Protected */}
+
+          <Route
+            element={<ProtectedRoute />}
+          >
 
             <Route
-              path="/profile"
-              element={<Profile />}
-            />
-
-             <Route
-              path="/profile/edit"
-              element={<EditProfile />}
-             />
-
-            {/* Posts */}
-
-            <Route
-              path="/posts"
-              element={<PostsPage />}
-            />
+              element={<DashboardLayout />}
+            >
 
 
-
-            {/* Countries */}
-
-            <Route
-              path="/countries"
-              element={<CountriesPage />}
-            />
+              <Route
+                path="/dashboard"
+                element={<Dashboard />}
+              />
 
 
-            <Route
-              path="/countries/:countryId"
-              element={<CountryDetailsPage />}
-            />
+              <Route
+                path="/profile"
+                element={<Profile />}
+              />
+
+
+              <Route
+                path="/profile/edit"
+                element={<EditProfile />}
+              />
 
 
 
-            {/* Universities */}
+              {/* Posts */}
 
-            <Route
-              path="/universities"
-              element={<UniversitiesPage />}
-            />
-
-
-            <Route
-              path="/universities/:universityId"
-              element={<UniversityDetailsPage />}
-            />
+              <Route
+                path="/posts"
+                element={<PostsPage />}
+              />
 
 
 
-            {/* Faculties */}
+              {/* Countries */}
 
-            <Route
-              path="/faculties"
-              element={<Faculties />}
-            />
-
-
-            <Route
-              path="/universities/:universityId/faculties"
-              element={<Faculties />}
-            />
+              <Route
+                path="/countries"
+                element={<CountriesPage />}
+              />
 
 
-
-            {/* Academic */}
-
-            <Route
-              path="/faculties/:id/specialties"
-              element={<Specialties />}
-            />
+              <Route
+                path="/countries/:countryId"
+                element={<CountryDetailsPage />}
+              />
 
 
-            <Route
-              path="/specialties/:id/levels"
-              element={<Levels />}
-            />
+
+              {/* Universities */}
+
+              <Route
+                path="/universities"
+                element={<UniversitiesPage />}
+              />
 
 
-            <Route
-              path="/levels/:levelId/semesters"
-              element={<Semesters />}
-            />
+              <Route
+                path="/universities/:universityId"
+                element={<UniversityDetailsPage />}
+              />
 
 
-            <Route
-              path="/semesters/:semesterId/modules"
-              element={<Modules />}
-            />
+
+              {/* Academic */}
+
+              <Route
+                path="/faculties"
+                element={<Faculties />}
+              />
 
 
+              <Route
+                path="/faculties/:id/specialties"
+                element={<Specialties />}
+              />
+
+
+              <Route
+                path="/specialties/:id/levels"
+                element={<Levels />}
+              />
+
+
+              <Route
+                path="/levels/:levelId/semesters"
+                element={<Semesters />}
+              />
+
+
+              <Route
+                path="/semesters/:semesterId/modules"
+                element={<Modules />}
+              />
+
+
+            </Route>
 
           </Route>
 
-        </Route>
 
 
+          {/* Fallback */}
+
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to="/"
+                replace
+              />
+            }
+          />
 
 
-        {/* 404 */}
-
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to="/"
-              replace
-            />
-          }
-        />
+        </Routes>
 
 
-      </Routes>
+      </FeedProvider>
+
 
     </BrowserRouter>
 

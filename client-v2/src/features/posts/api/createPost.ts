@@ -1,16 +1,24 @@
 import { supabase } from "../../../lib/supabaseClient";
+import type { AudienceType } from "../types/post";
 
 interface CreatePostData {
   content: string;
-  image?: File | null;
+  images?: File[];
   pdf?: File | null;
+
+  audienceType: AudienceType;
 }
 
 export async function createPost({
   content,
-  image,
+  images = [],
   pdf,
+  audienceType,
 }: CreatePostData) {
+  // =========================
+  // Current User
+  // =========================
+
   const {
     data: { user },
     error: userError,
@@ -22,62 +30,121 @@ export async function createPost({
     throw new Error("يجب تسجيل الدخول");
   }
 
-  let imageUrl: string | null = null;
-  let pdfUrl: string | null = null;
+  // =========================
+  // Current Profile
+  // =========================
 
-  // رفع الصورة
-  if (image) {
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
+    .from("profiles")
+    .select(`
+      faculty_id,
+      specialty_id,
+      level_id,
+      module_id
+    `)
+    .eq("user_id", user.id)
+    .single();
+
+  if (profileError) {
+    console.error(profileError);
+    throw profileError;
+  }
+
+  // =========================
+  // Upload Images
+  // =========================
+
+  const imageUrls: string[] = [];
+
+  for (const image of images) {
     const imageName = `${user.id}-${Date.now()}-${image.name}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("posts")
       .upload(imageName, image, {
         upsert: true,
       });
 
-    console.log("Image Upload:", data);
+    if (error) throw error;
 
-    if (error) {
-      console.error("Image Upload Error:", error);
-      throw error;
-    }
-
-    imageUrl = supabase.storage
+    const url = supabase.storage
       .from("posts")
       .getPublicUrl(imageName).data.publicUrl;
+
+    imageUrls.push(url);
   }
 
-  // رفع PDF
+  // =========================
+  // Upload PDF
+  // =========================
+
+  let pdfUrl: string | null = null;
+
   if (pdf) {
     const pdfName = `${user.id}-${Date.now()}-${pdf.name}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("posts")
       .upload(pdfName, pdf, {
         upsert: true,
       });
 
-    console.log("PDF Upload:", data);
-
-    if (error) {
-      console.error("PDF Upload Error:", error);
-      throw error;
-    }
+    if (error) throw error;
 
     pdfUrl = supabase.storage
       .from("posts")
       .getPublicUrl(pdfName).data.publicUrl;
   }
 
-  const { error } = await supabase.from("posts").insert({
-    user_id: user.id,
-    content,
-    image_url: imageUrl,
-    pdf_url: pdfUrl,
-  });
+  // =========================
+  // Insert Post
+  // =========================
+
+  const { error } = await supabase
+    .from("posts")
+    .insert({
+      user_id: user.id,
+
+      content,
+
+      images_urls: imageUrls,
+
+      pdf_url: pdfUrl,
+
+      audience_type: audienceType,
+
+      faculty_id:
+        audienceType === "faculty" ||
+        audienceType === "specialty" ||
+        audienceType === "level" ||
+        audienceType === "module"
+          ? profile?.faculty_id ?? null
+          : null,
+
+      specialty_id:
+        audienceType === "specialty" ||
+        audienceType === "level" ||
+        audienceType === "module"
+          ? profile?.specialty_id ?? null
+          : null,
+
+      level_id:
+        audienceType === "level" ||
+        audienceType === "module"
+          ? profile?.level_id ?? null
+          : null,
+
+      module_id:
+        audienceType === "module"
+          ? profile?.module_id ?? null
+          : null,
+    });
 
   if (error) {
-    console.error("Insert Error:", error);
+    console.error(error);
     throw error;
   }
 }

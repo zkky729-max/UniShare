@@ -1,26 +1,23 @@
 import { supabase } from "../../../lib/supabaseClient";
 
-export async function toggleLike(postId: string) {
+export async function toggleLike(
+  postId: string,
+  liked: boolean
+) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("يجب تسجيل الدخول");
+    throw new Error("Not authenticated");
   }
 
-  const { data: existing } = await supabase
-    .from("likes")
-    .select("id")
-    .eq("post_id", postId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existing) {
+  if (liked) {
     const { error } = await supabase
-      .from("likes")
+      .from("post_likes")
       .delete()
-      .eq("id", existing.id);
+      .eq("post_id", postId)
+      .eq("user_id", user.id);
 
     if (error) throw error;
 
@@ -28,7 +25,7 @@ export async function toggleLike(postId: string) {
   }
 
   const { error } = await supabase
-    .from("likes")
+    .from("post_likes")
     .insert({
       post_id: postId,
       user_id: user.id,
