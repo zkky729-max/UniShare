@@ -1,11 +1,11 @@
 {
   "name": "unishare",
   "private": true,
+  "scripts": {
+    "dev": "concurrently -n SERVER,CLIENT -c blue,green \"pnpm --filter server dev\" \"pnpm --filter client-v2 dev\""
+  },
   "devDependencies": {
     "concurrently": "^9.0.0"
-  },
-  "scripts": {
-    "dev": "concurrently -n SERVER,CLIENT -c blue,green \"pnpm --filter server dev\" \"pnpm --filter client dev\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
